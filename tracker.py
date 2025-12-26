@@ -1,6 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+from geometry_engine import GeometryEngine
 
 class PoseTracker:
     def __init__(self, min_detection_confidence=0.7, min_tracking_confidence=0.7):
@@ -47,11 +48,41 @@ def main():
 
     while True:
         ret, frame = cap.read()
+
+        if not ret: 
+            break
+        
+        
         frame, result = detector.find_pose(frame)
+        lm_list = detector.find_positions(frame, draw=False)
+
+        if (len(lm_list)) != 0:
+            h, w, c = frame.shape
+
+            # MediaPipe IDs: 11=Left Shoulder, 13=Left Elbow, 15=Left Wrist
+            def get_coords(index):
+                point = lm_list[index]
+                return [point[1], point[2], point[3] * w]
+            
+            p1 = get_coords(11)
+            p2 = get_coords(13)
+            p3 = get_coords(15)
+
+            angle = GeometryEngine.calculate_angle(p1, p2, p3)
+
+            # draw the lines and angle
+            cv2.putText(frame, str(int(angle)), (p2[0] - 20, p2[1] - 20)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+
+            cv2.line(frame, (p1[0], p1[1]), (p2[0], p2[1]), (255, 255, 255), 3)
+            cv2.line(frame, (p3[0], p3[1]), (p2[0], p2[1]), (255, 255, 255), 3)
 
         cv2.imshow("Frame", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
     
 # if run directly, main is executed. python internally sets __name__ = __main__ but if I'm importing it __name__ == __main__ is false
 if __name__ == "__main__":

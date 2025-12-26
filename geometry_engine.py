@@ -20,10 +20,15 @@ class GeometryEngine:
         ba = a - b
         bc = c - b
 
-        cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
+        dot_product = np.dot(ba, bc)
+        norm_ba = np.linalg.norm(ba)
+        norm_bc = np.linalg.norm(bc)
 
-        angle = np.arccos(np.clip(cosine_angle, -1.0, 1.0)) #computers can make rounding errors so using clip
+        if norm_ba or norm_bc == 0:
+            return 0.0
+        
+        cosine_angle = dot_product / norm_ba * norm_bc
 
-        degrees = np.degrees(angle)
+        angle_rad = np.arccos(np.clip(cosine_angle, -1.0, 1.0)) #computers can make rounding errors so using clip
 
-        return degrees
+        return np.degrees(angle_rad)
