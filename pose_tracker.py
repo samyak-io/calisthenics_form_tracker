@@ -2,6 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 from geometry_engine import GeometryEngine
+from rep_tracker import RepState, calculate_next_state
 
 class PoseTracker:
     def __init__(self, min_detection_confidence=0.7, min_tracking_confidence=0.7):
@@ -45,6 +46,7 @@ class PoseTracker:
 def main():
     cap = cv2.VideoCapture(0)
     detector = PoseTracker()
+    current_state = RepState()
 
     while True:
         ret, frame = cap.read()
@@ -70,20 +72,30 @@ def main():
 
             angle = GeometryEngine.calculate_angle(p1, p2, p3)
 
-            # draw the lines and angle
-            cv2.putText(frame, str(int(angle)), (p2[0] - 20, p2[1] - 20)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+            # brain of the tracker
+            current_state = calculate_next_state(current_state, angle)
 
-            cv2.line(frame, (p1[0], p1[1]), (p2[0], p2[1]), (255, 255, 255), 3)
-            cv2.line(frame, (p3[0], p3[1]), (p2[0], p2[1]), (255, 255, 255), 3)
+            # draw the lines and angle at elbow 
+            # syntax:
+            # cv2.putText(image, text, org, font, fontScale, color, thickness=1, lineType=cv2.LINE_8, bottomLeftOrigin=False)
+            cv2.putText(frame, str(int(angle)), (p2[0] - 20, p2[1] - 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+            
+            # draw the rep counter box
+            # image, start point, end point, color, thickness
+            cv2.rectangle(frame, (0,0), (250, 100), (245,117, 16), cv2.FILLED)
+            cv2.putText(frame, f"REPS: {current_state.count}", (10, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2)
+            cv2.putText(frame, f"STAGE: {current_state.stage}", (10, 90), 
+                       cv2.FONT_HERSHEY_PLAIN, 1.5, (255, 255, 255), 2)
 
-        cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", frame)  
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
 
-    
+
 # if run directly, main is executed. python internally sets __name__ = __main__ but if I'm importing it __name__ == __main__ is false
 if __name__ == "__main__":
     main()
