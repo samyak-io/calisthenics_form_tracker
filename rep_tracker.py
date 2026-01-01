@@ -16,7 +16,7 @@ class RepState:
     UP_THRESHOLD: float = 160.0
     DOWN_THRESHOLD: float = 90.0
 
-def calculate_next_state(current_state, RepState, angle: float) -> RepState:
+def calculate_next_state(current_state: RepState, angle: float) -> RepState:
     count = current_state.count 
     stage = current_state.stage
 
