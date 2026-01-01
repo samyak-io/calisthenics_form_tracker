@@ -3,6 +3,7 @@ import mediapipe as mp
 import numpy as np
 from geometry_engine import GeometryEngine
 from rep_tracker import RepState, calculate_next_state
+from voice_engine import VoiceEngine
 
 class PoseTracker:
     def __init__(self, min_detection_confidence=0.5, min_tracking_confidence=0.85):
@@ -62,6 +63,10 @@ def main():
     cap = cv2.VideoCapture(0)
     detector = PoseTracker()
     current_state = RepState()
+
+    voice = VoiceEngine()
+    voice.speak("System ready. Get started.")
+    previous_count = 0
 
     while True:
         ret, frame = cap.read()
@@ -123,6 +128,18 @@ def main():
                     status_color = (0, 0, 255) #red
                     feedback_text = "FIX HIPS!"
 
+
+                # --- AUDIO TRIGGER 1: REP COMPLETION ---
+                # If count jumped from 0 -> 1, speak "One"
+                if current_state.count > previous_count:
+                    voice.speak(str(current_state.count), cooldown=0.5)
+                    previous_count = current_state.count
+
+                # --- AUDIO TRIGGER 2: FORM CORRECTION ---
+                # Only speak errors if we are in the "active" zone (checking visibility)
+                if 'feedback_text' in locals() and feedback_text == "FIX HIPS!":
+                    # 3 second cooldown so it doesn't spam you
+                    voice.speak("Fix your hips", cooldown=3.0)    
 
                 #-----visualization-----
                 # syntax: cv2.putText(image, text, org, font, fontScale, color, thickness=1, lineType=cv2.LINE_8, bottomLeftOrigin=False)
