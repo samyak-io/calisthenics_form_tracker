@@ -11,7 +11,11 @@ class RepState:
 
     count: int = 0
     stage: Stage = "UP"
+    baseline_hip_anlge: float | None = None
 
+    form_errors: int = 0
+    lowest_hip_angle: float = 180.0
+    
     # Thresholds for pushup
     UP_THRESHOLD: float = 160.0
     DOWN_THRESHOLD: float = 90.0
