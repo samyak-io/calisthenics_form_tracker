@@ -6,7 +6,6 @@ A real-time Python application that uses a webcam to count exercise repetitions 
 
 ## Addressed Challenges
 
-* **Hard to Count Manually:** Simple trackers miss the distinct phases of a rep (going down, holding, coming back up). This app uses a state machine to make sure a rep is fully completed before counting it.
 * **Bad Form Causes Injury:** The app checks for specific mistakes (like sagging hips during push-ups) instead of just counting volume.
 * **Can't Look at a Screen Mid-Set:** Checking a screen ruins your posture. This app uses real-time audio alerts so you can keep your head away from screen and still fix your form.
 
